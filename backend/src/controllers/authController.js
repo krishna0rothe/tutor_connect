@@ -121,7 +121,7 @@ exports.registerParent = async (req, res) => {
 
 // Controller to handle teacher registration
 exports.registerTeacher = async (req, res) => {
-  const { name, email, password, phone, specialization, qualification } =
+  const { name, email, password, mobile, specialization, qualification } =
     req.body;
 
   // Check if all required fields are provided
@@ -129,14 +129,14 @@ exports.registerTeacher = async (req, res) => {
     !name ||
     !email ||
     !password ||
-    !phone ||
+    !mobile ||
     !specialization ||
     !qualification
   ) {
     return res.status(400).json({
       status: "failed",
       message:
-        "All fields are required: name, email, password, phone, specialization, and qualification.",
+        "All fields are required: name, email, password, mobile, specialization, and qualification.",
     });
   }
 
@@ -150,12 +150,12 @@ exports.registerTeacher = async (req, res) => {
       });
     }
 
-    // Check if phone number already exists
-    const existingTeacherByPhone = await Teacher.findOne({ phone });
-    if (existingTeacherByPhone) {
+    // Check if mobile number already exists
+    const existingTeacherByMobile = await Teacher.findOne({ mobile });
+    if (existingTeacherByMobile) {
       return res.status(200).json({
         status: "failed",
-        message: "Teacher with this phone number already exists.",
+        message: "Teacher with this mobile number already exists.",
       });
     }
 
@@ -167,7 +167,7 @@ exports.registerTeacher = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      phone,
+      mobile,
       specialization,
       qualification,
     });
@@ -182,7 +182,7 @@ exports.registerTeacher = async (req, res) => {
       teacher: {
         name: newTeacher.name,
         email: newTeacher.email,
-        phone: newTeacher.phone,
+        mobile: newTeacher.mobile,
         specialization: newTeacher.specialization,
         qualification: newTeacher.qualification,
       },
