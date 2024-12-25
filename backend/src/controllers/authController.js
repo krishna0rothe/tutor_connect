@@ -10,20 +10,20 @@ exports.registerStudent = async (req, res) => {
 
   // Check if all required fields are provided
   if (!name || !email || !password || !mobile) {
-    return res
-      .status(400)
-      .json({
-        message: "All fields are required: name, email, password, and mobile.",
-      });
+    return res.status(400).json({
+      status: "failed",
+      message: "All fields are required: name, email, password, and mobile.",
+    });
   }
 
   try {
     // Check if student already exists by email
     const existingStudent = await Student.findOne({ email });
     if (existingStudent) {
-      return res
-        .status(400)
-        .json({ message: "Student with this email already exists." });
+      return res.status(200).json({
+        status: "failed",
+        message: "Student with this email already exists.",
+      });
     }
 
     // Hash the password before saving
@@ -42,6 +42,7 @@ exports.registerStudent = async (req, res) => {
 
     // Return success response
     res.status(201).json({
+      status: "success",
       message: "Student registered successfully.",
       student: {
         name: newStudent.name,
@@ -51,107 +52,151 @@ exports.registerStudent = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error, please try again later." });
+    res.status(500).json({
+      status: "failed",
+      message: "Server error, please try again later.",
+    });
   }
 };
 
 
+
 // Controller to handle parent registration
 exports.registerParent = async (req, res) => {
-    const { name, email, password, mobile } = req.body;
+  const { name, email, password, mobile } = req.body;
 
-    // Check if all required fields are provided
-    if (!name || !email || !password || !mobile) {
-        return res.status(400).json({ message: 'All fields are required: name, email, password, and mobile.' });
+  // Check if all required fields are provided
+  if (!name || !email || !password || !mobile) {
+    return res.status(400).json({
+      status: "failed",
+      message: "All fields are required: name, email, password, and mobile.",
+    });
+  }
+
+  try {
+    // Check if parent already exists by email
+    const existingParent = await Parent.findOne({ email });
+    if (existingParent) {
+      return res.status(200).json({
+        status: "failed",
+        message: "Parent with this email already exists.",
+      });
     }
 
-    try {
-        // Check if parent already exists by email
-        const existingParent = await Parent.findOne({ email });
-        if (existingParent) {
-            return res.status(400).json({ message: 'Parent with this email already exists.' });
-        }
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Hash the password before saving
-        const hashedPassword = await bcrypt.hash(password, 10);
+    // Create a new parent
+    const newParent = new Parent({
+      name,
+      email,
+      password: hashedPassword,
+      mobile,
+    });
 
-        // Create a new parent
-        const newParent = new Parent({
-            name,
-            email,
-            password: hashedPassword,
-            mobile
-        });
+    // Save the parent to the database
+    await newParent.save();
 
-        // Save the parent to the database
-        await newParent.save();
-
-        // Return success response
-        res.status(201).json({
-            message: 'Parent registered successfully.',
-            parent: { name: newParent.name, email: newParent.email, mobile: newParent.mobile }
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error, please try again later.' });
-    }
+    // Return success response
+    res.status(201).json({
+      status: "success",
+      message: "Parent registered successfully.",
+      parent: {
+        name: newParent.name,
+        email: newParent.email,
+        mobile: newParent.mobile,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: "failed",
+      message: "Server error, please try again later.",
+    });
+  }
 };
+
+
 
 
 // Controller to handle teacher registration
 exports.registerTeacher = async (req, res) => {
-    const { name, email, password, phone, specialization, qualification } = req.body;
+  const { name, email, password, phone, specialization, qualification } =
+    req.body;
 
-    // Check if all required fields are provided
-    if (!name || !email || !password || !phone || !specialization || !qualification) {
-        return res.status(400).json({ message: 'All fields are required: name, email, password, phone, specialization, and qualification.' });
+  // Check if all required fields are provided
+  if (
+    !name ||
+    !email ||
+    !password ||
+    !phone ||
+    !specialization ||
+    !qualification
+  ) {
+    return res.status(400).json({
+      status: "failed",
+      message:
+        "All fields are required: name, email, password, phone, specialization, and qualification.",
+    });
+  }
+
+  try {
+    // Check if teacher already exists by email
+    const existingTeacherByEmail = await Teacher.findOne({ email });
+    if (existingTeacherByEmail) {
+      return res.status(200).json({
+        status: "failed",
+        message: "Teacher with this email already exists.",
+      });
     }
 
-    try {
-        // Check if teacher already exists by email
-        const existingTeacher = await Teacher.findOne({ email });
-        if (existingTeacher) {
-            return res.status(400).json({ message: 'Teacher with this email already exists.' });
-        }
-
-        // Check if phone number already exists
-        const existingPhone = await Teacher.findOne({ phone });
-        if (existingPhone) {
-            return res.status(400).json({ message: 'Teacher with this phone number already exists.' });
-        }
-
-        // Hash the password before saving
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create a new teacher
-        const newTeacher = new Teacher({
-            name,
-            email,
-            password: hashedPassword,
-            phone,
-            specialization,
-            qualification
-        });
-
-        // Save the teacher to the database
-        await newTeacher.save();
-
-        // Return success response
-        res.status(201).json({
-            message: 'Teacher registered successfully.',
-            teacher: {
-                name: newTeacher.name,
-                email: newTeacher.email,
-                phone: newTeacher.phone,
-                specialization: newTeacher.specialization,
-                qualification: newTeacher.qualification
-            }
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error, please try again later.' });
+    // Check if phone number already exists
+    const existingTeacherByPhone = await Teacher.findOne({ phone });
+    if (existingTeacherByPhone) {
+      return res.status(200).json({
+        status: "failed",
+        message: "Teacher with this phone number already exists.",
+      });
     }
+
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create a new teacher
+    const newTeacher = new Teacher({
+      name,
+      email,
+      password: hashedPassword,
+      phone,
+      specialization,
+      qualification,
+    });
+
+    // Save the teacher to the database
+    await newTeacher.save();
+
+    // Return success response
+    res.status(201).json({
+      status: "success",
+      message: "Teacher registered successfully.",
+      teacher: {
+        name: newTeacher.name,
+        email: newTeacher.email,
+        phone: newTeacher.phone,
+        specialization: newTeacher.specialization,
+        qualification: newTeacher.qualification,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: "failed",
+      message: "Server error, please try again later.",
+    });
+  }
 };
+
+
 
 
 
@@ -162,14 +207,17 @@ exports.login = async (req, res) => {
 
     // Check if email and password are provided
     if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password are required.' });
+        return res.status(400).json({
+            status: "failed",
+            message: "Email and password are required."
+        });
     }
 
     try {
         let user = null;
         let role = '';
 
-        // Check if user exists in any model
+        // Check if user exists in any model (Student, Parent, Teacher)
         user = await Student.findOne({ email });
         if (user) role = 'student';
 
@@ -183,14 +231,21 @@ exports.login = async (req, res) => {
             if (user) role = 'teacher';
         }
 
+        // If no user found, return a 404 error
         if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
+            return res.status(404).json({
+                status: "failed",
+                message: "User not found."
+            });
         }
 
         // Check if the password matches
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Invalid password.' });
+            return res.status(401).json({
+                status: "failed",
+                message: "Invalid password."
+            });
         }
 
         // Generate a JWT token
@@ -204,15 +259,18 @@ exports.login = async (req, res) => {
             { expiresIn: '1d' }
         );
 
-        // Return token
+        // Return success response with token
         res.status(200).json({
-            message: 'Login successful.',
+            status: "success",
+            message: "Login successful.",
             token
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server error, please try again later.' });
+        res.status(500).json({
+            status: "failed",
+            message: "Server error, please try again later."
+        });
     }
 };
-
 
