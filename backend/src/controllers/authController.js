@@ -61,62 +61,83 @@ exports.registerStudent = async (req, res) => {
 
 
 
-// Controller to handle parent registration
+// Parent registration controller
 exports.registerParent = async (req, res) => {
-  const { name, email, password, mobile } = req.body;
-
-  // Check if all required fields are provided
-  if (!name || !email || !password || !mobile) {
-    return res.status(400).json({
-      status: "failed",
-      message: "All fields are required: name, email, password, and mobile.",
-    });
-  }
+  const { name, email, password, mobile, studentEmail } = req.body;
 
   try {
-    // Check if parent already exists by email
-    const existingParent = await Parent.findOne({ email });
-    if (existingParent) {
-      return res.status(200).json({
+    // Check if all fields are provided
+    if (!name || !email || !password || !mobile || !studentEmail) {
+      return res.status(400).json({
         status: "failed",
-        message: "Parent with this email already exists.",
+        message: "All fields are required."
       });
     }
 
-    // Hash the password before saving
+    // Check if parent already exists
+    const existingParent = await Parent.findOne({ email });
+    if (existingParent) {
+      return res.status(400).json({
+        status: "failed",
+        message: "Parent with this email already exists."
+      });
+    }
+
+    // Check if student exists with provided email
+    const student = await Student.findOne({ email: studentEmail });
+    if (!student) {
+      return res.status(404).json({
+        status: "failed",
+        message: "Student not found with the given email."
+      });
+    }
+
+    // Hash the parent's password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new parent
+    // Create new parent document
     const newParent = new Parent({
       name,
       email,
       password: hashedPassword,
       mobile,
+      student: student._id, // Store student's ObjectId in parent
     });
 
-    // Save the parent to the database
-    await newParent.save();
+    // Save the parent document
+    const savedParent = await newParent.save();
 
-    // Return success response
+    // Update the student document with the parent's ID
+    student.parent = savedParent._id; // Store parent's ObjectId in student
+    await student.save();
+
+    // Create JWT token for the parent
+    const token = jwt.sign(
+      { userId: savedParent._id, role: "parent" },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // Prepare the response with only required fields
+    const parentResponse = {
+      name: savedParent.name,
+      email: savedParent.email,
+      mobile: savedParent.mobile
+    };
+
     res.status(201).json({
       status: "success",
       message: "Parent registered successfully.",
-      parent: {
-        name: newParent.name,
-        email: newParent.email,
-        mobile: newParent.mobile,
-      },
+      parent: parentResponse,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
       status: "failed",
-      message: "Server error, please try again later.",
+      message: "Server error, please try again later."
     });
   }
 };
-
-
 
 
 // Controller to handle teacher registration

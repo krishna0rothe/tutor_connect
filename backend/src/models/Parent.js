@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-// Parent schema
 const parentSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -10,7 +9,7 @@ const parentSchema = new mongoose.Schema(
     student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
-      default: null,
+      default: null, // Will be populated after student registration
     },
   },
   { timestamps: true }

@@ -91,4 +91,24 @@ exports.updateCourse = async (req, res) => {
         console.error(error);
         res.status(500).json({ message: 'Server error, please try again later.' });
     }
-};  
+}; 
+
+// Get course details by ID with only specific fields
+exports.getCourseById = async (req, res) => {
+    const { courseId } = req.params;
+
+    try {
+        // Find the course by ID and select only the specific fields
+        const course = await Course.findById(courseId)
+            .select('name description specialization total_stages thumbnail'); // Limit fields to specific ones
+
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found.' });
+        }
+
+        res.status(200).json(course);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error, please try again later.' });
+    }
+};
