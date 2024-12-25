@@ -8,5 +8,6 @@ router.post("/registerparent", authController.registerParent);
 router.post("/registerteacher", authController.registerTeacher);  
 router.post("/login", authController.login); 
 
+
 module.exports = router;
-    
+     
