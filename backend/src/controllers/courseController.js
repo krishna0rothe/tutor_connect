@@ -235,7 +235,7 @@ exports.getMyStudents = async (req, res) => {
     if (courses.length === 0) {
       return res
         .status(404)
-        .json({ message: "No courses found for this tutor." });
+        .json({ status: "failed", message: "No courses found for this tutor." });
     }
 
     // Format response
@@ -251,9 +251,13 @@ exports.getMyStudents = async (req, res) => {
       totalEnrolled: course.enrolled.length,
     }));
 
-    res.status(200).json(response);
+    res.status(200).json({
+      status: "success",
+      message: "Students retrieved successfully.",
+      response,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error, please try again later." });
+    res.status(500).json({ status: "failed", message: "Server error, please try again later." });
   }
 };

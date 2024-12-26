@@ -123,12 +123,16 @@ exports.getStageById = async (req, res) => {
     // Find stage by ID
     const stage = await Stage.findById(stageId);
     if (!stage) {
-      return res.status(404).json({ message: "Stage not found." });
+      return res.status(404).json({ status: "failed", message: "Stage not found." });
     }
 
-    res.status(200).json(stage);
+    res.status(200).json({
+      status: "success",
+      message: "Stage retrieved successfully.",
+      stage,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error, please try again later." });
+    res.status(500).json({ status: "failed", message: "Server error, please try again later." });
   }
 };
