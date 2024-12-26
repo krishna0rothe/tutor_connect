@@ -35,3 +35,22 @@ exports.getUserInfo = async (req, res) => {
     res.status(500).json({ message: "Server error, please try again later." });
   }
 };
+
+exports.getUserRole = (req, res) => {
+  try {
+    const { role } = req.user; // Extract role from req.user set by middleware
+
+    if (!role) {
+      return res.status(400).json({ message: "Role not found in user data." });
+    }
+
+    res.status(200).json({
+      message: "User role retrieved successfully.",
+      role,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error, please try again later." });
+  }
+};
+

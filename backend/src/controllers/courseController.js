@@ -1,5 +1,7 @@
 const Course = require("../models/Course");
 const Teacher = require("../models/Teacher");
+const Progress = require("../models/Progress");
+const Stage = require("../models/Stage");
 
 // Create a new course
 exports.createCourse = async (req, res) => {
@@ -142,4 +144,80 @@ exports.getAllCoursesByTutor = async (req, res) => {
         console.error(error);
         res.status(500).json({ status: "failed", message: 'Server error, please try again later.' });
     }
+};
+
+exports.getCourseDetails = async (req, res) => {
+  const courseId = req.params.courseId;
+
+  try {
+    // Fetch the course by ID and populate the creator and content fields
+    const course = await Course.findById(courseId)
+      .populate("creator", "name email specialization qualification") // Populates creator details
+      .populate({
+        path: "content",
+        select: "title description no", // Populates stage details
+      });
+
+    if (!course) {
+      return res.status(404).json({ status: "failed", message: "Course not found." });
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Course details retrieved successfully.",
+      course,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ status: "failed", message: "Server error, please try again later." });
+  }
+};
+
+
+exports.enrollStudentInCourse = async (req, res) => {
+  const studentId = req.user.id; // Student ID provided by middleware
+  const { courseId } = req.body;
+
+  try {
+    // Find the course
+    const course = await Course.findById(courseId).populate("content");
+    if (!course) {
+      return res.status(404).json({ status: "failed", message: "Course not found." });
+    }
+
+    // Check if the student is already enrolled
+    if (course.enrolled.includes(studentId)) {
+      return res
+        .status(400)
+        .json({ status: "failed", message: "Student is already enrolled in this course." });
+    }
+
+    // Get the first stage of the course
+    const firstStage = course.content.length > 0 ? course.content[0] : null;
+    if (!firstStage) {
+      return res.status(400).json({ status: "failed", message: "Course has no stages defined." });
+    }
+
+    // Add student to the enrolled list
+    course.enrolled.push(studentId);
+    await course.save();
+
+    // Create a progress entry for the student
+    const progress = new Progress({
+      studentId,
+      courseId,
+      currentStage: firstStage._id,
+      totalStages: course.total_stages,
+    });
+    await progress.save();
+
+    res.status(201).json({
+      status: "success",
+      message: "Student enrolled successfully and progress created.",
+      progress,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ status: "failed", message: "Server error, please try again later." });
+  }
 };

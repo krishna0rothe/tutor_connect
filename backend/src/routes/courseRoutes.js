@@ -7,6 +7,8 @@ const router = express.Router();
 router.post("/create", verifyToken, checkRole("teacher"), courseController.createCourse);
 router.get("/getallcourse", verifyToken, checkRole("teacher"), courseController.getAllCoursesByTutor);
 router.put("/update/:courseId", verifyToken, checkRole("teacher"), courseController.updateCourse);
+router.get("/getcourse/:courseId", verifyToken, courseController.getCourseDetails);
+router.post("/enroll", verifyToken, courseController.enrollStudentInCourse);
 router.get("/:courseId", verifyToken,checkRole("teacher"), courseController.getCourseById);
 
 module.exports = router;

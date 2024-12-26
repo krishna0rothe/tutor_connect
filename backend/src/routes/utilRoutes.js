@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Register new student
 router.get("/me", verifyToken, utilController.getUserInfo);
-
+router.get("/myrole",verifyToken, utilController.getUserRole);
 
 
 module.exports = router;
