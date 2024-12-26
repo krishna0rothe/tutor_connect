@@ -221,3 +221,39 @@ exports.enrollStudentInCourse = async (req, res) => {
     res.status(500).json({ status: "failed", message: "Server error, please try again later." });
   }
 };
+
+
+exports.getMyStudents = async (req, res) => {
+  const tutorId = req.user.id; // Tutor ID provided by middleware
+
+  try {
+    // Find all courses created by the tutor
+    const courses = await Course.find({ creator: tutorId })
+      .populate("enrolled", "name email") // Populate enrolled students with name and email
+      .select("name description enrolled"); // Select specific fields for response
+
+    if (courses.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No courses found for this tutor." });
+    }
+
+    // Format response
+    const response = courses.map((course) => ({
+      courseId: course._id,
+      courseName: course.name,
+      description: course.description,
+      enrolledStudents: course.enrolled.map((student) => ({
+        id: student._id,
+        name: student.name,
+        email: student.email,
+      })),
+      totalEnrolled: course.enrolled.length,
+    }));
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error, please try again later." });
+  }
+};

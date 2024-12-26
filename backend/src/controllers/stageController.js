@@ -115,3 +115,20 @@ exports.deleteStage = async (req, res) => {
         res.status(500).json({ status: "failed", message: 'Server error, please try again later.' });
     }
 };
+
+exports.getStageById = async (req, res) => {
+  const { stageId } = req.params;
+
+  try {
+    // Find stage by ID
+    const stage = await Stage.findById(stageId);
+    if (!stage) {
+      return res.status(404).json({ message: "Stage not found." });
+    }
+
+    res.status(200).json(stage);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error, please try again later." });
+  }
+};

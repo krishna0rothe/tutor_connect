@@ -277,7 +277,7 @@ exports.login = async (req, res) => {
                 email: user.email
             },
             process.env.JWT_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '1d' } // Set token validity to 1 day
         );
 
         // Return success response with token

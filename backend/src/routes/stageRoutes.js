@@ -6,4 +6,5 @@ const router = express.Router();
 router.post("/create", verifyToken, checkRole("teacher"), stageController.createStage);
 router.put("/update/:stageId", verifyToken, checkRole("teacher"), stageController.updateStage);
 router.delete("/delete/:stageId", verifyToken, checkRole("teacher"), stageController.deleteStage);
+router.get("/get/:stageId", verifyToken, stageController.getStageById);
 module.exports = router;
