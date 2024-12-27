@@ -16,10 +16,12 @@ const progressSchema = new mongoose.Schema({
     ref: "Stage",
     required: true,
   },
-  completedStages: {
-    type: Number,
-    default: 0,
-  },
+  completedStages: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Stage",
+    },
+  ],
   totalStages: {
     type: Number,
     required: true,

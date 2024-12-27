@@ -9,6 +9,7 @@ router.get("/getallcourse", verifyToken, checkRole("teacher"), courseController.
 router.get("/getall", verifyToken, courseController.getAllCourses);
 router.put("/update/:courseId", verifyToken, checkRole("teacher"), courseController.updateCourse);
 router.get("/getcourse/:courseId", verifyToken, courseController.getCourseDetails);
+router.get("/getcourse/student/:courseId", verifyToken, courseController.getCourseDetailsWithProgress);
 router.post("/enroll", verifyToken, checkRole("student"), courseController.enrollStudentInCourse);
 router.get("/get/my-students", verifyToken,checkRole("teacher"), courseController.getMyStudents);    
 router.get("/get/:courseId", verifyToken,checkRole("teacher"), courseController.getCourseById);

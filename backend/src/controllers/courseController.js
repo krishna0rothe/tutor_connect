@@ -271,7 +271,9 @@ exports.updateProgress = async (req, res) => {
     // Validate course
     const course = await Course.findById(courseId).populate("content");
     if (!course) {
-      return res.status(404).json({ status: "failed", message: "Course not found." });
+      return res
+        .status(404)
+        .json({ status: "failed", message: "Course not found." });
     }
 
     // Validate stage
@@ -279,38 +281,46 @@ exports.updateProgress = async (req, res) => {
     if (!stage || !course.content.some((s) => s._id.toString() === stageId)) {
       return res
         .status(404)
-        .json({ status: "failed", message: "Stage not found in the specified course." });
+        .json({
+          status: "failed",
+          message: "Stage not found in the specified course.",
+        });
     }
 
     // Get progress for the student in this course
     let progress = await Progress.findOne({ studentId, courseId });
     if (!progress) {
-      return res
-        .status(404)
-        .json({
-          status: "failed",
-          message: "Progress not found for the student in this course.",
-        });
+      return res.status(404).json({
+        status: "failed",
+        message: "Progress not found for the student in this course.",
+      });
     }
 
     // Check if the stage is already completed
-    const stageIndex = course.content.findIndex(
-      (s) => s._id.toString() === stageId
-    );
-    if (stageIndex + 1 <= progress.completedStages) {
-      return res.status(200).json({ status: "success", message: "Stage already completed." });
+    if (
+      progress.completedStages.some(
+        (completedStage) => completedStage.toString() === stageId
+      )
+    ) {
+      return res
+        .status(200)
+        .json({ status: "success", message: "Stage already completed." });
     }
 
-    // Update progress fields
-    progress.currentStage = stageId;
+    // Update completedStages array
+    progress.completedStages.push(stageId);
 
-    // Increment completedStages only if progressing sequentially
-    if (stageIndex + 1 === progress.completedStages + 1) {
-      progress.completedStages += 1;
+    // Update the currentStage to the next stage, if any
+    const nextStageIndex =
+      course.content.findIndex((s) => s._id.toString() === stageId) + 1;
+    if (nextStageIndex < course.content.length) {
+      progress.currentStage = course.content[nextStageIndex];
+    } else {
+      progress.currentStage = null; // No more stages left
     }
 
-    // Update status if course is completed
-    if (progress.completedStages === progress.totalStages) {
+    // Update the status if all stages are completed
+    if (progress.completedStages.length === progress.totalStages) {
       progress.status = "completed";
     }
 
@@ -328,9 +338,15 @@ exports.updateProgress = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: "failed", message: "Server error, please try again later." });
+    res
+      .status(500)
+      .json({
+        status: "failed",
+        message: "Server error, please try again later.",
+      });
   }
 };
+
 
 exports.getAllCourses = async (req, res) => {
   try {
@@ -370,5 +386,64 @@ exports.getAllCourses = async (req, res) => {
   }
 };
 
+
+exports.getCourseDetailsWithProgress = async (req, res) => {
+  const courseId = req.params.courseId;
+  const studentId = req.user.id; // Provided by middleware
+
+  try {
+    // Fetch the course by ID and populate the creator and content fields
+    const course = await Course.findById(courseId)
+      .populate("creator", "name email specialization qualification") // Populates creator details
+      .populate({
+        path: "content",
+        select: "title description no", // Populates stage details
+      });
+
+    if (!course) {
+      return res
+        .status(404)
+        .json({ status: "failed", message: "Course not found." });
+    }
+
+    // Fetch the student's progress in the course
+    const progress = await Progress.findOne({ studentId, courseId });
+
+    // If progress exists, mark stages as completed or incomplete
+    const stagesWithCompletionStatus = course.content.map((stage) => ({
+      _id: stage._id,
+      title: stage.title,
+      description: stage.description,
+      no: stage.no,
+      completed: progress
+        ? progress.completedStages.some(
+            (completedStage) =>
+              completedStage.toString() === stage._id.toString()
+          )
+        : false, // Default to false if no progress found
+    }));
+
+    res.status(200).json({
+      status: "success",
+      message: "Course details retrieved successfully.",
+      course: {
+        _id: course._id,
+        title: course.title,
+        description: course.description,
+        creator: course.creator,
+        totalStages: course.content.length,
+        content: stagesWithCompletionStatus,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({
+        status: "failed",
+        message: "Server error, please try again later.",
+      });
+  }
+};
 
 
