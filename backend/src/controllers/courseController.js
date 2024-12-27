@@ -261,3 +261,111 @@ exports.getMyStudents = async (req, res) => {
     res.status(500).json({ status: "failed", message: "Server error, please try again later." });
   }
 };
+
+
+exports.updateProgress = async (req, res) => {
+  const { courseId, stageId } = req.body;
+  const studentId = req.user.id; // Provided by middleware
+
+  try {
+    // Validate course
+    const course = await Course.findById(courseId).populate("content");
+    if (!course) {
+      return res.status(404).json({ status: "failed", message: "Course not found." });
+    }
+
+    // Validate stage
+    const stage = await Stage.findById(stageId);
+    if (!stage || !course.content.some((s) => s._id.toString() === stageId)) {
+      return res
+        .status(404)
+        .json({ status: "failed", message: "Stage not found in the specified course." });
+    }
+
+    // Get progress for the student in this course
+    let progress = await Progress.findOne({ studentId, courseId });
+    if (!progress) {
+      return res
+        .status(404)
+        .json({
+          status: "failed",
+          message: "Progress not found for the student in this course.",
+        });
+    }
+
+    // Check if the stage is already completed
+    const stageIndex = course.content.findIndex(
+      (s) => s._id.toString() === stageId
+    );
+    if (stageIndex + 1 <= progress.completedStages) {
+      return res.status(200).json({ status: "success", message: "Stage already completed." });
+    }
+
+    // Update progress fields
+    progress.currentStage = stageId;
+
+    // Increment completedStages only if progressing sequentially
+    if (stageIndex + 1 === progress.completedStages + 1) {
+      progress.completedStages += 1;
+    }
+
+    // Update status if course is completed
+    if (progress.completedStages === progress.totalStages) {
+      progress.status = "completed";
+    }
+
+    await progress.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Progress updated successfully.",
+      progress: {
+        currentStage: progress.currentStage,
+        completedStages: progress.completedStages,
+        totalStages: progress.totalStages,
+        status: progress.status,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ status: "failed", message: "Server error, please try again later." });
+  }
+};
+
+exports.getAllCourses = async (req, res) => {
+  try {
+    const courses = await Course.find({})
+      .populate({
+        path: "creator",
+        select: "name email specialization qualification",
+        model: Teacher,
+      })
+      .populate({
+        path: "enrolled",
+        select: "name email",
+      });
+
+    const formattedCourses = courses.map((course) => ({
+      id: course._id,
+      name: course.name,
+      description: course.description,
+      specialization: course.specialization,
+      thumbnail: course.thumbnail,
+      creator: course.creator,
+      totalStages: course.totalStages,
+      totalEnrolled: course.enrolled.length,
+    }));
+
+    res.status(200).json({
+      status: "success",
+      message: "Courses retrieved successfully.",
+      courses: formattedCourses,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: "failed",
+      message: "Server error while retrieving courses.",
+    });
+  }
+};
