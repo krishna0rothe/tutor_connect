@@ -411,7 +411,7 @@ exports.getCourseDetailsWithProgress = async (req, res) => {
 
     // If progress exists, mark stages as completed or incomplete
     const stagesWithCompletionStatus = course.content.map((stage) => ({
-      _id: stage._id,
+      id: stage._id,
       title: stage.title,
       description: stage.description,
       no: stage.no,
