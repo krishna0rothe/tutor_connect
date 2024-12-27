@@ -19,7 +19,7 @@ exports.getStudentEnrolledCourses = async (req, res) => {
       });
 
     const formattedCourses = enrolledProgress.map((progress) => ({
-      courseId: progress.courseId._id,
+      id: progress.courseId._id,
       name: progress.courseId.name,
       description: progress.courseId.description,
       specialization: progress.courseId.specialization,
