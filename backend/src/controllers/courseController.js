@@ -429,6 +429,7 @@ exports.getCourseDetailsWithProgress = async (req, res) => {
       course: {
         id: course._id,
         title: course.title,
+        thumbnail: course.thumbnail, // Include thumbnail in the response
         description: course.description,
         creator: course.creator,
         totalStages: course.content.length,
