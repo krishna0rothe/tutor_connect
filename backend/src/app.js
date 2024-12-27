@@ -5,7 +5,8 @@ const authRoutes = require("./routes/authRoutes");
 const utilRoutes = require("./routes/utilRoutes");
 const courseRoutes = require("./routes/courseRoutes");
 const stageRoutes = require("./routes/stageRoutes");
-//const tutorRoutes = require("./routes/tutorRoutes");
+const tutorRoutes = require("./routes/tutorRoutes");
+const studentRoutes = require("./routes/studentRoutes");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/util", utilRoutes);
 app.use("/api/course", courseRoutes);
 app.use("/api/stage", stageRoutes);
-//app.use("/api/tutors", tutorRoutes);
+app.use("/api/tutor", tutorRoutes);
+app.use("/api/student", studentRoutes);
 
 module.exports = app;
