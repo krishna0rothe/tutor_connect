@@ -8,12 +8,14 @@ exports.getAllTutors = async (req, res) => {
     );
 
     res.status(200).json({
+      status: "success",
       message: "Tutors retrieved successfully.",
       tutors,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
+      status: "failed",
       message: "Server error while retrieving tutors.",
     });
   }

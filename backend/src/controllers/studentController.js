@@ -34,12 +34,14 @@ exports.getStudentEnrolledCourses = async (req, res) => {
     }));
 
     res.status(200).json({
+      status: "success",
       message: "Enrolled courses retrieved successfully.",
       courses: formattedCourses,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
+      status: "failed",
       message: "Server error while retrieving enrolled courses.",
     });
   }
