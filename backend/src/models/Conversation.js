@@ -1,29 +1,33 @@
 const mongoose = require("mongoose");
 
-const conversationSchema = new mongoose.Schema(
-  {
-    parent: {
+const conversationSchema = new mongoose.Schema({
+  participants: [
+    {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Parent",
+      refPath: "participantModel",
       required: true,
     },
-    teacher: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Teacher",
-      required: true,
-    },
-    lastMessage: {
-      type: String,
-      default: "",
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
-    },
+  ],
+  participantModel: {
+    type: String,
+    required: true,
+    enum: ["Parent", "Teacher"], // Parent or Teacher
   },
-  { timestamps: true }
-);
+  lastMessage: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Message",
+  },
+  lastMessageTime: {
+    type: Date,
+    default: Date.now,
+  },
+  messages: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+    },
+  ],
+});
 
 const Conversation = mongoose.model("Conversation", conversationSchema);
-
 module.exports = Conversation;

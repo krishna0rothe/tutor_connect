@@ -427,7 +427,7 @@ exports.getCourseDetailsWithProgress = async (req, res) => {
       status: "success",
       message: "Course details retrieved successfully.",
       course: {
-        _id: course._id,
+        id: course._id,
         title: course.title,
         description: course.description,
         creator: course.creator,
