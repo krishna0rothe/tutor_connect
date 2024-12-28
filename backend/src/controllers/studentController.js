@@ -132,3 +132,79 @@ exports.getStudentProgress = async (req, res) => {
   }
 };
 
+
+exports.getCoursesAndUniqueTeachers = async (req, res) => {
+  const { id: parentId } = req.user; // Extract parent ID from middleware
+
+  try {
+    // Find the parent
+    const parent = await Parent.findById(parentId).select("student");
+    if (!parent) {
+      return res.status(404).json({ message: "Parent not found" });
+    }
+
+    // Get the student linked to the parent
+    const studentId = parent.student;
+    const student = await Student.findById(studentId).select("name");
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // Find progress records for the student
+    const progressRecords = await Progress.find({ studentId }).select(
+      "courseId"
+    );
+    if (!progressRecords.length) {
+      return res
+        .status(404)
+        .json({ message: "No courses found for the student" });
+    }
+
+    // Extract unique course IDs
+    const courseIds = [
+      ...new Set(progressRecords.map((record) => record.courseId)),
+    ];
+
+    // Find course details
+    const courses = await Course.find({ _id: { $in: courseIds } }).select(
+      "name creator"
+    );
+
+    // Extract unique teacher IDs from courses
+    const teacherIds = [
+      ...new Set(courses.map((course) => course.creator.toString())),
+    ];
+
+    // Find teacher details
+    const teachers = await Teacher.find({ _id: { $in: teacherIds } }).select(
+      "name email"
+    );
+
+    // Prepare the response
+    const response = {
+      student: {
+        id: student._id,
+        name: student.name,
+      },
+      courses: courses.map((course) => ({
+        id: course._id,
+        name: course.name,
+      })),
+      uniqueTeachers: teachers.map((teacher) => ({
+        id: teacher._id,
+        name: teacher.name,
+        email: teacher.email,
+      })),
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Server error while fetching courses and teachers",
+      error: error.message,
+    });
+  }
+};
+
+
