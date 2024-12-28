@@ -7,6 +7,7 @@ import LoginPage from "./pages/LoginPage";
 import AuthLayout from "./components/auth/Layout";
 import Dashboard from "./pages/Dashboard";
 import { ManageCourseComponent } from "./pages/ManageCourse";
+import { StudentCourseViewComponent } from "./pages/StudentCourseViewComponent";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
         <Route path="/dashboard"element={<Dashboard />} />
         <Route path="/myCourse/:courseId" element={<ManageCourseComponent />} />
+        <Route path="/course/:courseId" element={<StudentCourseViewComponent />} />
       </Routes>
     </Router>
   );

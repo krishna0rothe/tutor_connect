@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import img from "../../assets/call_on_action.png"
+import { Link } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -42,9 +43,11 @@ const CallToAction: React.FC = () => {
               Join thousands of learners and start your journey today!
             </p>
             <div className="flex space-x-4">
-              <button className="bg-yellow-400 text-blue-900 px-6 py-3 rounded-full text-lg font-semibold hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105">
+              <Link to={"/dashboard"}>
+              <button  className="bg-yellow-400 text-blue-900 px-6 py-3 rounded-full text-lg font-semibold hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105">
                 Start Learning Today
               </button>
+              </Link>
               <button className="border-2 border-white text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300">
                 Contact Us
               </button>

@@ -5,31 +5,35 @@ import BASE_URL from '../utils/constants';
 import { TeacherDashboard } from '../components/dashboard/TeacherDashboard';
 import { ParentDashboard } from '../components/dashboard/ParentDashboard';
 import { StudentDashboard } from '../components/dashboard/StudentDashboard';
-import { motion } from 'framer-motion';
 
 type UserRole = 'teacher' | 'parent' | 'student';
 
 const Dashboard: React.FC = () => {
   const [user, setUser] = useState<any>(null);
-  const [userRole, setUserRole] = useState<UserRole>('teacher');
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
   const navigate = useNavigate();   
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
+        localStorage.removeItem("token");
         navigate('/login');
         return;
       }
 
       try {
-        const response = await axios.get(`${BASE_URL}/api/util/me`, {
+        const userInfoResponse = await axios.get(`${BASE_URL}/api/util/me`, {
+          headers: {token }
+        });
+        setUser(userInfoResponse.data.user);
+
+        const userRoleResponse = await axios.get(`${BASE_URL}/api/util/myrole`, {
           headers: { token }
         });
-        setUser(response.data.user);
-        // setUserRole(response.data.user.role);
+        setUserRole(userRoleResponse.data.role);
       } catch (error) {
-        console.error('Error fetching user info', error);
+        console.error('Error fetching user info or role', error);
         navigate('/login');
       }
     };
@@ -50,7 +54,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  if (!user) {
+  if (!user || !userRole) {
     return <div>Loading...</div>;
   }
 
