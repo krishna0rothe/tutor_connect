@@ -8,7 +8,7 @@ exports.createEvent = async (req, res) => {
 
   // Validate the required fields
   if (!title || !thumbnail || !description || !date || !time) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(400).json({ status: "failed", message: "All fields are required" });
   }
 
   // Convert date and time to a Date object
@@ -18,7 +18,7 @@ exports.createEvent = async (req, res) => {
   if (eventDateTime <= new Date()) {
     return res
       .status(400)
-      .json({ message: "Event date and time must be in the future" });
+      .json({ status: "failed", message: "Event date and time must be in the future" });
   }
 
   try {
@@ -60,7 +60,7 @@ exports.getUpcomingEvents = async (req, res) => {
     }).sort({ date: 1 }); // Sort events by date in ascending order
 
     if (upcomingEvents.length === 0) {
-      return res.status(404).json({ message: "No upcoming events found" });
+      return res.status(404).json({ status: "failed", message: "No upcoming events found" });
     }
 
     res.status(200).json({
@@ -88,7 +88,7 @@ exports.getPastEvents = async (req, res) => {
     }).sort({ date: -1 }); // Sort events by date in descending order (most recent past events first)
 
     if (pastEvents.length === 0) {
-      return res.status(404).json({ message: "No past events found" });
+      return res.status(404).json({ status: "failed", message: "No past events found" });
     }
 
     res.status(200).json({
@@ -113,7 +113,7 @@ exports.registerForEvent = async (req, res) => {
     // Check if the event exists
     const event = await Event.findById(eventId);
     if (!event) {
-      return res.status(404).json({ message: "Event not found" });
+      return res.status(404).json({ status: "failed", message: "Event not found" });
     }
 
     // Check if the user is a student or parent
@@ -123,14 +123,14 @@ exports.registerForEvent = async (req, res) => {
     if (!student && !parent) {
       return res
         .status(400)
-        .json({ message: "User is neither a student nor a parent" });
+        .json({ status: "failed", message: "User is neither a student nor a parent" });
     }
 
     // Add the user to the event attendees (only if they aren't already registered)
     if (event.attendees.includes(userId)) {
       return res
         .status(400)
-        .json({ message: "You are already registered for this event" });
+        .json({ status: "failed", message: "You are already registered for this event" });
     }
 
     // Add the user ID to the attendees array
@@ -159,16 +159,20 @@ exports.getRegisteredEvents = async (req, res) => {
     const events = await Event.find({ attendees: userId });
 
     if (events.length === 0) {
-      return res.status(404).json({ message: "No events found for the user" });
+      return res.status(404).json({ status: "failed", message: "No events found for the user" });
     }
 
     // Return the list of events
     res.status(200).json({
+      status: "success",
       message: "Registered events fetched successfully",
       events,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error while fetching events" });
+    res.status(500).json({
+      status: "failed",
+      message: "Server error while fetching events",
+    });
   }
 };

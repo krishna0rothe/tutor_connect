@@ -4,14 +4,14 @@ const conversationSchema = new mongoose.Schema({
   participants: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      refPath: "participantModel",
       required: true,
+      refPath: "participantsModel",
     },
   ],
-  participantModel: {
-    type: String,
+  participantsModel: {
+    type: [String], // Array of models corresponding to participants
     required: true,
-    enum: ["Parent", "Teacher"], // Parent or Teacher
+    enum: ["Parent", "Teacher"], // Only "Parent" or "Teacher"
   },
   lastMessage: {
     type: mongoose.Schema.Types.ObjectId,
