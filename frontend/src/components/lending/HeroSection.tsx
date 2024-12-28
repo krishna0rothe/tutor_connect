@@ -5,6 +5,7 @@ import globe from '../../assets/globe.png';
 import pencil from '../../assets/pencil.png';
 import result from '../../assets/result.png';
 import star from '../../assets/star.png';
+import { Link } from 'react-router-dom';
 
 const HeroSection: React.FC = () => {
   const heroRef = useRef<HTMLElement>(null);
@@ -50,12 +51,14 @@ const HeroSection: React.FC = () => {
         <p className="text-xl sm:text-2xl mb-8">
           Unlock your potential with our innovative educational platform
         </p>
+        <Link to="/dashboard">
         <button
           ref={ctaRef}
           className="bg-yellow-400 text-blue-900 px-8 py-3 rounded-full text-lg font-semibold hover:bg-yellow-300 transition-all duration-300 transform hover:scale-105"
         >
           Get Started
         </button>
+        </Link>
       </div>
       <div className="absolute bottom-0 left-0 right-0">
         <svg

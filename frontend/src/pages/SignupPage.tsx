@@ -89,6 +89,18 @@ const SignupPage: React.FC = () => {
             />
             {errors.mobile && <p className="text-red-600">{errors.mobile.message}</p>}
           </div>
+          {role === 'parent' && (
+            <div>
+              <label htmlFor="studentEmail" className="block mb-1">Student Email</label>
+              <input
+                type="email"
+                id="studentEmail"
+                {...register('studentEmail', { required: 'Student Email is required' })}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+              {errors.studentEmail && <p className="text-red-600">{errors.studentEmail.message}</p>}
+            </div>
+          )}
           {role === 'teacher' && (
             <>
               <div>
