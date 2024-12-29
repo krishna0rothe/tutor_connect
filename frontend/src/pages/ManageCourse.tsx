@@ -4,8 +4,9 @@ import { SlideBar } from '../components/dashboard/Slidebar';
 import { MdUpdate } from "react-icons/md";
 import { UpdateCourse } from '../components/dashboard/teacher/UpdateCourse';
 import { FaLayerGroup } from "react-icons/fa6";
-import { StageList } from '@/components/dashboard/teacher/StageList';
+import { VscPreview } from "react-icons/vsc";
 import { AddStageComponent } from '@/components/dashboard/teacher/AddStageComponent';
+import { CoursePreview } from '@/components/dashboard/teacher/CoursePreview';
 
 export const ManageCourseComponent: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -15,10 +16,11 @@ export const ManageCourseComponent: React.FC = () => {
   const sidebarItems = [
     { icon: <MdUpdate />, label: 'Update Course' },
     { icon: <FaLayerGroup />, label: 'Stages' },
+    { icon: <VscPreview />, label: 'Preview Course' },
   ];
 
   const handleSidebarClick = (index: number) => {
-    const sections = ['update', 'stages'];
+    const sections = ['update', 'stages' , 'preview'];
     setActiveSection(sections[index]);
   };
 
@@ -29,6 +31,7 @@ export const ManageCourseComponent: React.FC = () => {
         <section>
           {activeSection === 'update' && <UpdateCourse courseId={courseId}  />}
           {activeSection === 'stages' && <AddStageComponent />}
+          {activeSection === 'preview' && <CoursePreview />}
         </section>
       </main>
     </div>
