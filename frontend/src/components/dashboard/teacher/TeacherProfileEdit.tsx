@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { PiUser, PiEnvelope, PiPhone, PiGraduationCap, PiCertificate, PiCaretDown } from 'react-icons/pi';
+import axios from 'axios';
+import BASE_URL from '../../../utils/constants';
 
 interface TeacherProfile {
   name: string;
   email: string;
-  phone: string;
+  mobile: string;
   specialization: string;
   qualification: string;
 }
 
-const specializations = ['Mathematics', 'Science', 'Literature', 'History', 'Computer Science']
+const specializations = ['Mathematics', 'Science', 'Literature', 'History', 'Computer Science'];
 
 const qualifications = [
   'Bachelor\'s Degree',
@@ -22,14 +24,44 @@ const qualifications = [
 
 const TeacherProfileEditForm: React.FC = () => {
   const [profile, setProfile] = useState<TeacherProfile>({
-    name: 'John Doe',
-    email: 'johndoe@example.com',
-    phone: '+1 (555) 123-4567',
-    specialization: 'Mathematics',
-    qualification: 'Ph.D.',
+    name: '',
+    email: '',
+    mobile: '',
+    specialization: '',
+    qualification: '',
   });
 
   const [errors, setErrors] = useState<Partial<TeacherProfile>>({});
+  const [loading, setLoading] = useState(true);
+  const [serverMessage, setServerMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        console.log("Fetching profile data with token:", token);
+        const response = await axios.get(`${BASE_URL}/api/util/me`, {
+          headers: {
+          token
+          },
+        });
+        console.log("Profile data fetched successfully:", response.data);
+        setProfile({
+          name: response.data.user.name,
+          email: response.data.user.email,
+          mobile: response.data.user.mobile,
+          specialization: response.data.user.specialization,
+          qualification: response.data.user.qualification,
+        });
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -44,7 +76,7 @@ const TeacherProfileEditForm: React.FC = () => {
     if (!profile.name.trim()) newErrors.name = 'Name is required';
     if (!profile.email.trim()) newErrors.email = 'Email is required';
     if (!/^\S+@\S+\.\S+$/.test(profile.email)) newErrors.email = 'Invalid email format';
-    if (!profile.phone.trim()) newErrors.phone = 'Phone is required';
+    if (!profile.mobile.trim()) newErrors.mobile = 'Mobile is required';
     if (!profile.specialization) newErrors.specialization = 'Specialization is required';
     if (!profile.qualification) newErrors.qualification = 'Qualification is required';
 
@@ -52,13 +84,29 @@ const TeacherProfileEditForm: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log('Form submitted:', profile);
-      alert('Profile updated successfully!');
+      try {
+        const token = localStorage.getItem("token");
+        console.log("Updating profile with data:", profile);
+        const response = await axios.put(`${BASE_URL}/api/tutor/update`, profile, {
+          headers: {
+          token
+          },
+        });
+        console.log("Profile updated successfully:", response.data);
+        setServerMessage('Profile updated successfully!');
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        setServerMessage('Error updating profile. Please try again.');
+      }
     }
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -102,21 +150,21 @@ const TeacherProfileEditForm: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone</label>
+            <label htmlFor="mobile" className="block text-sm font-medium text-gray-700">Mobile</label>
             <div className="mt-1 relative rounded-md shadow-sm">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <PiPhone className="h-5 w-5 text-gray-400" />
               </div>
               <input
                 type="tel"
-                name="phone"
-                id="phone"
-                className={`block w-full pl-10 pr-3 py-2 border ${errors.phone ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
-                value={profile.phone}
+                name="mobile"
+                id="mobile"
+                className={`block w-full pl-10 pr-3 py-2 border ${errors.mobile ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                value={profile.mobile}
                 onChange={handleChange}
               />
             </div>
-            {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+            {errors.mobile && <p className="mt-1 text-sm text-red-600">{errors.mobile}</p>}
           </div>
 
           <div>
@@ -180,6 +228,7 @@ const TeacherProfileEditForm: React.FC = () => {
             Update Profile
           </motion.button>
         </div>
+        {serverMessage && <p className="mt-4 text-center text-sm text-red-600">{serverMessage}</p>}
       </form>
     </div>
   );

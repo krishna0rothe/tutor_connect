@@ -1,12 +1,15 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SlideBar } from './Slidebar'
-import { PiStudentBold, PiChartLineUpBold, PiCalendarCheckBold, PiPlusBold, PiBooks, PiPencilBold } from 'react-icons/pi'
+import { PiStudentBold, PiChartLineUpBold, PiCalendarCheckBold, PiPlusBold, PiBooks, PiPencilBold, PiChatBold } from 'react-icons/pi'
 import { CreateCourse } from './teacher/CreateCourse'
 import { CourseList } from './teacher/CourseList'
 import { AddEventComponent } from './teacher/AddEventComponent'
 import { useNavigate } from 'react-router-dom'
 import TeacherProfileEdit from './teacher/TeacherProfileEdit'
+import { MyCoursesComponent } from './student/MyCoursesComponent'
+import MyStudentList from './teacher/MyStudentList'
+import ChatAttachment from './parent/ChatAttachment'
 
 const slideBarItems = [
   { icon: <PiStudentBold />, label: 'My Students' },
@@ -14,6 +17,7 @@ const slideBarItems = [
   { icon: <PiBooks />, label: 'My Courses' },
   { icon: <PiPlusBold />, label: 'Add Course' },
   { icon: <PiPencilBold />, label: 'Edit Profile' },
+  { icon: <PiChatBold />, label: 'Message Parent' },
 ]
 
 export const TeacherDashboard: React.FC = () => {
@@ -50,11 +54,12 @@ export const TeacherDashboard: React.FC = () => {
             transition={{ duration: 0.3 }}
             className="w-full"
           >
-            {activeComponent === 'My Students' && "<MyStudents />"}
+            {activeComponent === 'My Students' && <MyStudentList />}
             {activeComponent === 'Add Upcoming Events' && <AddEventComponent />}
             {activeComponent === 'My Courses' && <CourseList />}
             {activeComponent === 'Add Course' && <CreateCourse />}
             {activeComponent === 'Edit Profile' && <TeacherProfileEdit />}
+            {activeComponent === 'Message Parent' && <ChatAttachment />}
           </motion.div>
         </AnimatePresence>
       </main>

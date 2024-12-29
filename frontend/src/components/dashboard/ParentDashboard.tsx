@@ -6,6 +6,7 @@ import { EventListComponent } from './student/EventListComponent'
 import { useNavigate } from 'react-router-dom'
 import ChatComponent from './parent/ChatComponent'
 import StudentProgressComponent from './parent/StudentProgressComponent'
+import ChatAttachment from './parent/ChatAttachment'
 
 const slideBarItems = [
   { icon: <PiChartLineUpBold />, label: 'Student Progress' },
@@ -48,7 +49,7 @@ export const ParentDashboard: React.FC = () => {
             className="w-full"
           >
             {activeComponent === 'Student Progress' && <StudentProgressComponent />}
-            {activeComponent === 'Message Tutor' && <ChatComponent />}
+            {activeComponent === 'Message Tutor' && <ChatAttachment />}
             {activeComponent === 'Upcoming Events' && <EventListComponent />}
           </motion.div>
         </AnimatePresence>
