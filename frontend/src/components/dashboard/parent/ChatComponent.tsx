@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PiX } from "react-icons/pi";
 import UserList from "./UserList";
 import ChatModal from "./ChatModal";
-import axios from "axios";
-import BASE_URL from "../../../utils/constants";
+
+// Mock data for users
+const mockUsers = [
+  { id: "1", name: "John Doe" },
+  { id: "2", name: "Jane Smith" },
+  { id: "3", name: "Bob Johnson" },
+  { id: "4", name: "Alice Brown" },
+  { id: "5", name: "Charlie Davis" },
+];
 
 // Mock data for messages
 const mockMessages = [
@@ -41,48 +48,12 @@ const mockMessages = [
 ];
 
 const ChatComponent: React.FC = () => {
-  const [selectedUser, setSelectedUser] = useState<{ id: string; name: string } | null>(null);
+  const [selectedUser, setSelectedUser] = useState<
+    (typeof mockUsers)[0] | null
+  >(null);
   const [messages, setMessages] = useState(mockMessages);
-  const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const roleResponse = await axios.get(`${BASE_URL}/api/util/myrole`, {
-          headers: {
-            token
-          },
-        });
-        const role = roleResponse.data.role;
-
-        let usersResponse;
-        if (role === "student") {
-          usersResponse = await axios.get(`${BASE_URL}/api/student/getteachers`, {
-            headers: {
-              token
-            },
-          });
-        } else if (role === "teacher") {
-          usersResponse = await axios.get(`${BASE_URL}/api/tutor/studentparents`, {
-            headers: {
-              token
-            },
-          });
-        }
-
-        if (usersResponse) {
-          setUsers(usersResponse.data.uniqueTeachers);
-        }
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-
-    fetchUsers();
-  }, []);
-
-  const handleUserSelect = (user: { id: string; name: string }) => {
+  const handleUserSelect = (user: (typeof mockUsers)[0]) => {
     setSelectedUser(user);
     // In a real application, you would fetch messages for the selected user here
   };
@@ -103,7 +74,7 @@ const ChatComponent: React.FC = () => {
       <div className="flex h-screen bg-gray-100">
         <div className="w-1/3 bg-white shadow-md">
           <UserList
-            users={users}
+            users={mockUsers}
             onUserSelect={handleUserSelect}
             selectedUser={selectedUser}
           />

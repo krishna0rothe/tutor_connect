@@ -29,13 +29,13 @@ export const SlideBar: React.FC<SlideBarProps> = ({ items, onItemClick }) => {
       </div>
 
       {/* Profile at the bottom */}
-      <div className="border-t border-gray-200">
+      {/* <div className="border-t border-gray-200">
         <SlideBarItem
           icon={<PiUserCircleBold className="text-blue-600" />}
           label="Profile"
-          onClick={() => {/* Handle profile click */}}
-        />
-      </div>
+          onClick={() =>{}}
+        /> 
+      </div> */}
     </motion.div>
   )
 }

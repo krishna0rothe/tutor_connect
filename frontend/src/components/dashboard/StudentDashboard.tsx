@@ -7,6 +7,7 @@ import { FindTutorComponent } from './student/FindTutorComponent';
 import { MyCoursesComponent } from './student/MyCoursesComponent';
 import { EventListComponent } from './student/EventListComponent';
 import { useNavigate } from 'react-router-dom';
+import { SavedTutor } from './student/SavedTutor';
 
 const slideBarItems = [
   { icon: <PiMagnifyingGlassBold />, label: 'Find Tutor' },
@@ -51,7 +52,7 @@ export const StudentDashboard: React.FC = () => {
           >
             {activeComponent === 'Find Tutor' && <FindTutorComponent />}
             {activeComponent === 'My Courses' && <MyCoursesComponent />}
-            {activeComponent === 'Saved Tutors' && <div>Saved Tutors Component</div>}
+            {activeComponent === 'Saved Tutors' && <SavedTutor />}
             {activeComponent === 'Upcoming Sessions' && <EventListComponent />}
           </motion.div>
         </AnimatePresence>
