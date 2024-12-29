@@ -208,3 +208,51 @@ exports.getCoursesAndUniqueTeachers = async (req, res) => {
 };
 
 
+exports.getStudentTeachers = async (req, res) => {
+  const studentId = req.user.id; // Student ID from middleware
+
+  try {
+    // Find courses where the student is enrolled
+    const courses = await Course.find({ enrolled: studentId }).populate(
+      "creator",
+      "name email"
+    );
+
+    if (!courses.length) {
+      return res
+        .status(404)
+        .json({ message: "No teachers found for the enrolled courses" });
+    }
+
+    // Extract unique teachers from the courses
+    const uniqueTeachers = [];
+    const teacherSet = new Set();
+
+    courses.forEach((course) => {
+      if (course.creator && !teacherSet.has(course.creator._id.toString())) {
+        teacherSet.add(course.creator._id.toString());
+        uniqueTeachers.push({
+          id: course.creator._id,
+          name: course.creator.name,
+          email: course.creator.email,
+        });
+      }
+    });
+
+    // Return the unique teachers
+    res.status(200).json({
+      student: {
+        id: studentId,
+        teachers: uniqueTeachers,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Server error while fetching student teachers",
+      error: error.message,
+    });
+  }
+};
+
+
